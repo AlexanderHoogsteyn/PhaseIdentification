@@ -1,0 +1,102 @@
+import sys
+from os.path import dirname
+sys.path.append(dirname("../src/"))
+
+from src.PhaseIdentification.voltageBasedPhaseIdentification import *
+from src.PhaseIdentification.powerBasedPhaseIdentification import *
+
+include_three_phase = True
+accuracy_class = 0.5
+reps = 10
+salient_components = 0
+
+included_feeders = ["86315_785383","1076069_1274129", "1351982_1596442", "65025_80035"]
+cases = ["Case A", "Case C", "Case D", "Case E"]
+plt.figure(figsize=(8, 6), dpi=80)
+markers = ["o","D","s","<",">"]
+
+"""
+Voltage based technique POLA
+"""
+length_range = np.arange(1,20,2)
+scores = np.zeros(len(length_range))
+for i, feeder_id in enumerate(included_feeders):
+    for rep in range(reps):
+        feeder = Feeder(feederID=feeder_id, include_three_phase=include_three_phase,data="POLA_data/")
+        col = []
+        for length in length_range:
+            phase_identification = PhaseIdentification(feeder, ErrorClass(accuracy_class,s=False))
+            #phase_identification.load_correlation_xu_fixed(nb_salient_components=440, length=length, salient_components=1)
+            phase_identification.voltage_correlation_transfo_ref(length=length*24)
+            col += [phase_identification.accuracy()]
+        scores = scores + np.array(col)
+scores = scores/reps/len(included_feeders)
+plt.plot(length_range, scores*100,marker=markers[0], label="voltage Pearson correlation, Spain 60' ")
+
+"""
+Voltage based technique DUBLIN
+"""
+length_range = np.arange(1,60,2)
+scores = np.zeros(len(length_range))
+for i, feeder_id in enumerate(included_feeders):
+    for rep in range(reps):
+        feeder = Feeder(feederID=feeder_id, include_three_phase=include_three_phase,data="DUBLIN_data/")
+        col = []
+        for length in length_range:
+            phase_identification = PhaseIdentification(feeder, ErrorClass(accuracy_class,s=False))
+            #phase_identification.load_correlation_xu_fixed(nb_salient_components=440, length=length, salient_components=1)
+            phase_identification.voltage_correlation_transfo_ref(length=length*48)
+            col += [phase_identification.accuracy()]
+        scores = scores + np.array(col)
+scores = scores/reps/len(included_feeders)
+plt.plot(length_range, scores*100,marker=markers[1], label="voltage Pearson correlation, Ireland 30' ")
+
+"""
+Power based technique POLA
+"""
+length_range = np.arange(1,20,2)
+scores = np.zeros(len(length_range))
+for i, feeder_id in enumerate(included_feeders):
+    for rep in range(reps):
+        col = []
+        for length in length_range:
+            feeder = Feeder(feederID=feeder_id, include_three_phase=include_three_phase, data="POLA_data/")
+            phase_identification = PartialPhaseIdentification(feeder,ErrorClass(accuracy_class,s=True))
+            phase_identification.load_correlation_xu_fixed(nb_salient_components=int(length * 24 - 3),
+                                                  salient_components=salient_components, length=length*24)
+            col += [phase_identification.accuracy()]
+        scores = scores + np.array(col)
+scores = scores/reps/len(included_feeders)
+plt.plot(length_range, scores*100,marker=markers[2], label="power Pearson correlation, Spain 60' ")
+
+"""
+Power based technique DUBLIN
+"""
+length_range = np.arange(1,60,2)
+scores = np.zeros(len(length_range))
+for i, feeder_id in enumerate(included_feeders):
+    for rep in range(reps):
+        col = []
+        for length in length_range:
+            feeder = Feeder(feederID=feeder_id, include_three_phase=include_three_phase, data="DUBLIN_data/")
+            phase_identification = PartialPhaseIdentification(feeder,ErrorClass(accuracy_class,s=True))
+            phase_identification.load_correlation_xu_fixed(nb_salient_components=int(length * 48 - 3),
+                                                  salient_components=salient_components, length=length * 48)
+            col += [phase_identification.accuracy()]
+        scores = scores + np.array(col)
+scores = scores/reps/len(included_feeders)
+plt.plot(length_range, scores*100,marker=markers[3], label="power Pearson correlation, Ireland 30' ")
+
+
+# Decorations
+plt.rc('font', size=14)
+#plt.title(cases[case], fontsize=20)
+plt.xticks(fontsize=12)
+#plt.ylim([0,105])
+#plt.xlim([0,65])
+plt.xlabel("Duration (days) of data collected",fontsize=20)
+plt.ylabel("Accuracy (%)",fontsize=20)
+plt.yticks(fontsize=12)
+plt.legend()
+plt.show()
+#plt.savefig("voltage_penetration_comparison_10")

@@ -1,0 +1,35 @@
+{
+    "LVcustomers":[
+        {
+            "busId":5,
+            "coded_ean":"ZIV0040637053",
+            "connectionCapacity":17.32,
+            "deviceId":0,
+            "device_profile_file":"Load profiles POLA/2020/profile_ZIV0040637053_2020.csv",
+            "exclusiveNight":false,
+            "phases":[
+                1,
+                2,
+                3
+            ],
+            "yearlyNetConsumption":4756.708988729097,
+            "yearlyNetReactiveConsumption":464.83848642686223
+        },
+        {
+            "busId":12,
+            "coded_ean":"ZIV0047741053",
+            "connectionCapacity":27.71,
+            "deviceId":1,
+            "device_profile_file":"Load profiles POLA/2020/profile_ZIV0047741053_2020.csv",
+            "exclusiveNight":false,
+            "phases":[
+                1,
+                2,
+                3
+            ],
+            "yearlyNetConsumption":4447.747301907822,
+            "yearlyNetReactiveConsumption":385.1763419250098
+        }
+    ],
+    "solarGens":[]
+}
